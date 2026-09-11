@@ -1,0 +1,31 @@
+{
+	"name": "SalesRegionPoolTable",
+	"type": "Microsoft.Synapse/workspaces/datasets",
+	"properties": {
+		"description": "Region list held in the dedicated SQL pool. The pool name is replaced per environment at deploy time.",
+		"annotations": [],
+		"type": "SqlPoolTable",
+		"schema": [
+			{
+				"name": "RegionCode",
+				"type": "nvarchar"
+			},
+			{
+				"name": "RegionName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "IsActive",
+				"type": "bit"
+			}
+		],
+		"typeProperties": {
+			"schema": "sales",
+			"table": "Region"
+		},
+		"sqlPool": {
+			"referenceName": "pear_dw",
+			"type": "SqlPoolReference"
+		}
+	}
+}

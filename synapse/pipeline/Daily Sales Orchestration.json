@@ -1,0 +1,118 @@
+{
+	"name": "Daily Sales Orchestration",
+	"properties": {
+		"description": "Example 3 of 3 - a pipeline that uses NEITHER a linked service nor a dedicated SQL pool. It only orchestrates other pipelines, so it deploys unchanged to every environment and generates no ARM parameters.",
+		"activities": [
+			{
+				"name": "Set Batch Date",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "BatchDate",
+					"value": {
+						"value": "@formatDateTime(adddays(utcnow(), -1), 'yyyy-MM-dd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Run Load Customer Orders",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set Batch Date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Load Customer Orders",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BatchDate": {
+							"value": "@variables('BatchDate')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Run Refresh Sales Aggregates",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Run Load Customer Orders",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Refresh Sales Aggregates",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BatchDate": {
+							"value": "@variables('BatchDate')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Report Failure",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "Run Load Customer Orders",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "Run Refresh Sales Aggregates",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": {
+						"value": "@concat('Daily sales orchestration failed for batch ', variables('BatchDate'))",
+						"type": "Expression"
+					},
+					"errorCode": "DailySalesFailed"
+				}
+			}
+		],
+		"variables": {
+			"BatchDate": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Pear Analytics"
+		},
+		"annotations": []
+	}
+}

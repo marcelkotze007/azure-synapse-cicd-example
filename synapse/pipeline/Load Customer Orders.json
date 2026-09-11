@@ -1,0 +1,110 @@
+{
+	"name": "Load Customer Orders",
+	"properties": {
+		"description": "Example 1 of 3 - a pipeline that works through a LINKED SERVICE. Nothing here touches a dedicated SQL pool, so this pipeline contributes no ARM parameters of its own; the environment-specific values come from the linked service it uses.",
+		"activities": [
+			{
+				"name": "Copy Orders To Lake",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT OrderId, CustomerId, OrderDate, OrderTotal FROM orders.Orders WHERE OrderDate = '@{pipeline().parameters.BatchDate}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".csv"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "OrdersSqlTable",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "OrdersLakeCsv",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Mark Batch Complete",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Copy Orders To Lake",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "PearAzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"storedProcedureName": "[orders].[MarkBatchComplete]",
+					"storedProcedureParameters": {
+						"BatchDate": {
+							"value": {
+								"value": "@pipeline().parameters.BatchDate",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"BatchDate": {
+				"type": "string",
+				"defaultValue": "1900-01-01"
+			}
+		},
+		"folder": {
+			"name": "Pear Analytics"
+		},
+		"annotations": []
+	}
+}

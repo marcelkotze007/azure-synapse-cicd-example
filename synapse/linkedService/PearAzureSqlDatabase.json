@@ -1,0 +1,19 @@
+{
+	"name": "PearAzureSqlDatabase",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+        "annotations": [],
+        "type": "AzureSqlDatabase",
+        "typeProperties": {
+            "server": "sql-omni-dev-san.database.windows.net",
+            "database": "sqldb-omni-dev-san",
+            "encrypt": "mandatory",
+            "trustServerCertificate": false,
+            "authenticationType": "SystemAssignedManagedIdentity"
+        },
+        "connectVia": {
+            "referenceName": "omnisientIntegrationRuntime",
+            "type": "IntegrationRuntimeReference"
+        }
+    }
+}

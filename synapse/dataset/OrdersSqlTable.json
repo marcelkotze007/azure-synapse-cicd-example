@@ -1,0 +1,39 @@
+{
+	"name": "OrdersSqlTable",
+	"type": "Microsoft.Synapse/workspaces/datasets",
+	"properties": {
+		"description": "Orders table in the operational database, reached through a linked service.",
+		"linkedServiceName": {
+			"referenceName": "PearAzureSqlDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "OrderId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CustomerId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "OrderDate",
+				"type": "date"
+			},
+			{
+				"name": "OrderTotal",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			}
+		],
+		"typeProperties": {
+			"schema": "orders",
+			"table": "Orders"
+		}
+	}
+}
