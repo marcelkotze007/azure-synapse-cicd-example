@@ -1,0 +1,37 @@
+{
+	"name": "PearSalesExploration",
+	"properties": {
+		"description": "Minimal notebook, included so the notebooks section of template-parameters-definition.json has something to act on: its bigDataPool reference becomes an ARM parameter.",
+		"bigDataPool": {
+			"referenceName": "sparkpeardev",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "python"
+			}
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {},
+				"source": [
+					"df = spark.sql(\"SELECT RegionCode, SUM(OrderTotal) AS Revenue FROM sales.SalesSummary GROUP BY RegionCode\")\n",
+					"display(df)"
+				]
+			}
+		],
+		"folder": {
+			"name": "Pear Analytics"
+		}
+	}
+}

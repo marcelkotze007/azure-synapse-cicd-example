@@ -1,0 +1,131 @@
+{
+	"name": "Refresh Sales Aggregates",
+	"properties": {
+		"description": "Example 2 of 3 - a pipeline that works against a DEDICATED SQL POOL. It shows both places the parameterisation file looks for a sqlPool reference: on a top-level activity (index 0) and on an activity nested inside a container activity (index 2, nested index 0).",
+		"activities": [
+			{
+				"name": "Refresh Sales Summary",
+				"type": "SqlPoolStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"sqlPool": {
+					"referenceName": "pear_dw",
+					"type": "SqlPoolReference"
+				},
+				"typeProperties": {
+					"storedProcedureName": "[sales].[RefreshSalesSummary]",
+					"storedProcedureParameters": {
+						"BatchDate": {
+							"value": {
+								"value": "@pipeline().parameters.BatchDate",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				}
+			},
+			{
+				"name": "Lookup Active Regions",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Refresh Sales Summary",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlPoolSource",
+						"sqlReaderQuery": "SELECT RegionCode FROM sales.Region WHERE IsActive = 1",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SalesRegionPoolTable",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "For Each Region",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup Active Regions",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup Active Regions').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Rebuild Region Aggregate",
+							"type": "SqlPoolStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"sqlPool": {
+								"referenceName": "pear_dw",
+								"type": "SqlPoolReference"
+							},
+							"typeProperties": {
+								"storedProcedureName": "[sales].[RebuildRegionAggregate]",
+								"storedProcedureParameters": {
+									"RegionCode": {
+										"value": {
+											"value": "@item().RegionCode",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"BatchDate": {
+				"type": "string",
+				"defaultValue": "1900-01-01"
+			}
+		},
+		"folder": {
+			"name": "Pear Analytics"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,53 @@
+{
+    "Microsoft.Synapse/workspaces/notebooks": {
+        "properties": {
+            "bigDataPool": {
+                "referenceName": "="
+            }
+        }
+    },
+    "Microsoft.Synapse/workspaces/pipelines": {
+        "properties": {
+            "activities": [{
+                "sqlPool": {
+                    "referenceName": "-"
+                },
+                "typeProperties": {
+                    "activities": [{
+                        "sqlPool": {
+                            "referenceName": "-"
+                        }
+                    }]
+                }
+            }]
+        }
+    },
+    "Microsoft.Synapse/workspaces/linkedServices": {
+        "*": {
+            "properties": {
+                "typeProperties": {
+                    "server": "-",
+                    "database": "-",
+                    "accountName": "=",
+                    "username": "=",
+                    "password": "=",
+                    "connectionString": "=",
+                    "secretAccessKey": "="
+                }
+            }
+        }
+    },
+    "Microsoft.Synapse/workspaces/datasets": {
+        "*": {
+            "properties": {
+                "typeProperties": {
+                    "folderPath": "=",
+                    "fileName": "="
+                },
+                "sqlPool": {
+                    "referenceName": "-"
+                }
+            }
+        }
+    }
+}

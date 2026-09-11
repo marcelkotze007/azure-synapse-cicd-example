@@ -1,0 +1,26 @@
+{
+	"name": "OrdersLakeCsv",
+	"type": "Microsoft.Synapse/workspaces/datasets",
+	"properties": {
+		"description": "CSV landing location for exported orders.",
+		"linkedServiceName": {
+			"referenceName": "PearDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "orders.csv",
+				"folderPath": "orders/daily",
+				"container": "landing"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

@@ -1,0 +1,14 @@
+# Local editor settings
+.vscode/
+.idea/
+
+# Build output from local ARM template generation
+bin/
+obj/
+*.log
+
+# Never commit environment settings or secrets - they belong in
+# Azure DevOps variable groups or Azure Key Vault
+*.local.json
+*.secrets.json
+.env
